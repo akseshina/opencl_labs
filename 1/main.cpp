@@ -75,7 +75,6 @@ int main() {
             for (size_t j = 0; j < M; ++j)
                 in >> b[to_1D(i, j, M)];
 
-
         // allocate device buffer to hold message
         cl::Buffer dev_a(context, CL_MEM_READ_ONLY, sizeof(float) * matrix_size);
         cl::Buffer dev_b(context, CL_MEM_READ_ONLY, sizeof(float) * matrix_size);
@@ -87,8 +86,9 @@ int main() {
 
         // load named kernel from opencl source
         cl::Kernel kernel(program, "convolution");
-        size_t const block_size = std::min(16ul, N);
-        cl::KernelFunctor convolution(kernel, queue, cl::NullRange, cl::NDRange(N, N),
+        size_t const block_size = 16;
+        size_t const N2 = (N / block_size) * block_size + (int)(N % block_size > 0) * block_size;
+        cl::KernelFunctor convolution(kernel, queue, cl::NullRange, cl::NDRange(N2, N2),
                                       cl::NDRange(block_size, block_size));
         convolution(dev_a, dev_b, dev_c, (int) N, (int) M);
 
