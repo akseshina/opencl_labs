@@ -87,7 +87,9 @@ int main() {
 
         // load named kernel from opencl source
         cl::Kernel kernel(program, "convolution");
-        cl::KernelFunctor convolution(kernel, queue, cl::NullRange, cl::NDRange(N, N), cl::NullRange);
+        size_t const block_size = std::min(16ul, N);
+        cl::KernelFunctor convolution(kernel, queue, cl::NullRange, cl::NDRange(N, N),
+                                      cl::NDRange(block_size, block_size));
         convolution(dev_a, dev_b, dev_c, (int) N, (int) M);
 
         queue.enqueueReadBuffer(dev_c, CL_TRUE, 0, sizeof(float) * matrix_size, c.data());
